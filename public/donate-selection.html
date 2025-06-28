@@ -138,6 +138,9 @@
                     imageSrc = 'img/james.jpeg'; // Using james.jpeg for Steve as per earlier setup
                 } else if (person.username === 'kuhle789') {
                     imageSrc = 'img/maria.jpeg'; // Using maria.jpeg for Kuhle as per earlier setup
+                } else if (person.picture && person.picture.startsWith('data:image/')) {
+                    // Use uploaded data URL directly
+                    imageSrc = person.picture;
                 }
                 
                 card.innerHTML = `

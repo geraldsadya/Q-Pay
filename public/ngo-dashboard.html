@@ -81,13 +81,8 @@
         </div>
         <div class="form-group">
           <label>Picture</label>
-          <select id="newPic" required>
-            <option value="">Select a picture</option>
-            <option value="img/nomsa.jpeg">Nomsa's Photo</option>
-            <option value="img/james.jpeg">James's Photo</option>
-            <option value="img/maria.jpeg">Maria's Photo</option>
-            <option value="https://placehold.co/48x48?text=U">Generic User</option>
-          </select>
+          <input type="file" id="newPic" accept="image/*" required>
+          <small style="color: #666; font-size: 12px;">Upload an image from your computer (JPG, PNG, GIF)</small>
         </div>
         <div class="form-group">
           <label>Description</label>
@@ -116,8 +111,10 @@
         // Handle image display with proper fallbacks
         let imageSrc = person.picture || 'https://placehold.co/48x48?text=' + person.name.charAt(0);
         
-        // If it's a local image path, make sure it's accessible
-        if (imageSrc.startsWith('img/')) {
+        // If it's a data URL, use it directly
+        if (imageSrc.startsWith('data:image/')) {
+          // Data URL - use as is
+        } else if (imageSrc.startsWith('img/')) {
           // Local image - should work fine
         } else if (imageSrc.startsWith('http')) {
           // External URL - keep as is
@@ -156,8 +153,15 @@
       e.preventDefault();
       const name = document.getElementById('newName').value;
       const username = document.getElementById('newUsername').value;
-      const picture = document.getElementById('newPic').value;
+      const pictureFile = document.getElementById('newPic').files[0];
       const description = document.getElementById('newDesc').value;
+      
+      // Convert uploaded image to data URL
+      let picture = '';
+      if (pictureFile) {
+        picture = await convertFileToDataURL(pictureFile);
+      }
+      
       const res = await fetch('/api/people', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -175,6 +179,20 @@
       } else {
         alert(data.error || 'Error adding client');
       }
+    }
+
+    // Function to convert uploaded file to data URL
+    function convertFileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          resolve(e.target.result);
+        };
+        reader.onerror = function(e) {
+          reject(e);
+        };
+        reader.readAsDataURL(file);
+      });
     }
 
     window.withdraw = async function(username, form) {

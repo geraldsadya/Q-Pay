@@ -267,8 +267,8 @@
         // Initialize the page
         document.addEventListener("DOMContentLoaded", () => {
             const personId = getPersonId()
-            updatePersonInfo(personId)
-            setupEventListeners()
+            setupEventListeners() // Set up form listeners first
+            updatePersonInfo(personId) // Then update person info
         })
 
         async function updatePersonInfo(personId) {
@@ -294,7 +294,10 @@
                 
                 // Update the person photo - use the actual image if available
                 const personPhotoElement = document.getElementById("personPhoto");
-                if (person.picture && person.picture.startsWith('http')) {
+                if (person.picture && person.picture.startsWith('data:image/')) {
+                    // If it's a data URL, create an img element
+                    personPhotoElement.innerHTML = `<img src="${person.picture}" alt="${person.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+                } else if (person.picture && person.picture.startsWith('http')) {
                     // If it's a URL, create an img element
                     personPhotoElement.innerHTML = `<img src="${person.picture}" alt="${person.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
                 } else {
@@ -316,8 +319,11 @@
             const amountButtons = document.querySelectorAll(".amount-btn")
             const customAmountInput = document.getElementById("customAmount")
 
+            console.log('Setting up event listeners, found', amountButtons.length, 'amount buttons')
+
             amountButtons.forEach((btn) => {
                 btn.addEventListener("click", function () {
+                    console.log('Amount button clicked:', this.dataset.amount)
                     // Remove selected class from all buttons
                     amountButtons.forEach((b) => b.classList.remove("selected"))
 
@@ -328,15 +334,19 @@
                     if (this.dataset.amount === "custom") {
                         customAmountInput.style.display = "block"
                         customAmountInput.focus()
+                        console.log('Custom amount input shown')
                     } else {
                         customAmountInput.style.display = "none"
                         customAmountInput.value = ""
+                        console.log('Custom amount input hidden, selected amount:', this.dataset.amount)
                     }
                 })
             })
 
             // Form submission
-            document.getElementById("donationForm").addEventListener("submit", handleDonation)
+            const form = document.getElementById("donationForm")
+            console.log('Setting up form submission listener for:', form)
+            form.addEventListener("submit", handleDonation)
         }
 
         async function handleDonation(event) {
@@ -388,20 +398,30 @@
             const selectedAmountBtn = document.querySelector(".amount-btn.selected")
             let amount = ""
 
+            console.log('Getting form data, selected button:', selectedAmountBtn)
+
             if (selectedAmountBtn) {
+                console.log('Selected amount type:', selectedAmountBtn.dataset.amount)
                 if (selectedAmountBtn.dataset.amount === "custom") {
                     amount = document.getElementById("customAmount").value
+                    console.log('Custom amount value:', amount)
                 } else {
                     amount = selectedAmountBtn.dataset.amount
+                    console.log('Fixed amount value:', amount)
                 }
+            } else {
+                console.log('No amount button selected')
             }
 
-            return {
+            const formData = {
                 amount: amount,
                 purpose: "general", // Default purpose since we removed the field
                 donorName: document.getElementById("donorName").value || "Anonymous",
                 personId: getPersonId(),
             }
+
+            console.log('Form data collected:', formData)
+            return formData
         }
 
         function validateForm(formData) {
