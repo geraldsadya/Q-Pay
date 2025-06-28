@@ -128,8 +128,20 @@
                 card.className = 'person-card';
                 card.onclick = () => window.location.href = `/donate-person/${person.username}`;
                 
+                // Use actual images from img/ folder for specific people
+                let imageSrc = person.picture || 'https://placehold.co/120x120?text=' + person.name.charAt(0);
+                
+                // Map specific usernames to their actual images
+                if (person.username === 'nomsa123') {
+                    imageSrc = 'img/nomsa.jpeg';
+                } else if (person.username === 'steve456') {
+                    imageSrc = 'img/james.jpeg'; // Using james.jpeg for Steve as per earlier setup
+                } else if (person.username === 'kuhle789') {
+                    imageSrc = 'img/maria.jpeg'; // Using maria.jpeg for Kuhle as per earlier setup
+                }
+                
                 card.innerHTML = `
-                    <img src="${person.picture || 'https://placehold.co/120x120?text=' + person.name.charAt(0)}" 
+                    <img src="${imageSrc}" 
                          alt="${person.name}" class="person-photo">
                     <div class="person-name">${person.name}</div>
                     <div class="person-description">${person.description || 'No description available.'}</div>

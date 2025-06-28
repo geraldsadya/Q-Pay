@@ -189,7 +189,7 @@
             <div class="details-section" id="payment-details">
                 <!-- Payment details will be populated here -->
             </div>
-            <button class="btn" onclick="window.close()">Close Window</button>
+            <button class="btn" onclick="window.location.href='/donate-selection.html'">Donate Again</button>
         </div>
 
         <div id="error-state" style="display: none;">
@@ -215,7 +215,8 @@
         // Show debug info in development
         const isDev = window.location.hostname === 'localhost';
         if (isDev) {
-            document.getElementById('debug-info').style.display = 'block';
+            // Hide debug info by default
+            document.getElementById('debug-info').style.display = 'none';
         }
 
         async function completePayment() {
@@ -269,19 +270,6 @@
 
                 console.log('Sending completion payload:', completionPayload);
 
-                // Debug info for development
-                const debugInfo = {
-                    url: window.location.href,
-                    urlParams: { hash, interact_ref },
-                    sessionStorage: storedData,
-                    completionPayload: completionPayload,
-                    timestamp: new Date().toISOString()
-                };
-
-                if (isDev) {
-                    document.getElementById('debug-content').textContent = JSON.stringify(debugInfo, null, 2);
-                }
-
                 // Send completion request to backend
                 console.log('Sending payment completion request...');
                 const response = await fetch('http://localhost:3001/api/complete-payment', {
@@ -313,18 +301,6 @@
             } catch (error) {
                 console.error('❌ Payment completion error:', error);
                 showError(error.message, error);
-                
-                // Update debug info with error
-                if (isDev) {
-                    const debugContent = document.getElementById('debug-content');
-                    const currentDebug = debugContent.textContent;
-                    const errorDebug = {
-                        ...JSON.parse(currentDebug),
-                        error: error.message,
-                        errorDetails: error.stack
-                    };
-                    debugContent.textContent = JSON.stringify(errorDebug, null, 2);
-                }
             }
         }
 
@@ -349,12 +325,6 @@
                     <span class="detail-label">Timestamp:</span> 
                     ${new Date().toLocaleString()}
                 </div>
-                ${paymentData.sentAmount ? `
-                <div class="detail-item">
-                    <span class="detail-label">Amount:</span> 
-                    ${paymentData.sentAmount.value} ${paymentData.sentAmount.assetCode}
-                </div>
-                ` : ''}
                 ${paymentData.walletAddress ? `
                 <div class="detail-item">
                     <span class="detail-label">From:</span> 

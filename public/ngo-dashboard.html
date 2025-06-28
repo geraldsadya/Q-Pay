@@ -22,9 +22,47 @@
     .qr-section { text-align: center; margin-top: 24px; }
     .withdraw-form { display: flex; gap: 8px; margin-top: 8px; }
     .withdraw-form input { width: 80px; }
+    .delete-btn { 
+      background: #ef4444; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+      padding: 6px 12px; 
+      font-size: 12px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin-left: 8px;
+      transition: all 0.3s ease;
+    }
+    .delete-btn:hover { 
+      background: #dc2626; 
+      transform: scale(1.05);
+    }
+    .back-btn { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      background: #667eea; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 12px 20px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      text-decoration: none; 
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { 
+      background: #5a67d8; 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
   </style>
 </head>
 <body>
+  <a href="/" class="back-btn">← Back to Home</a>
   <div class="container">
     <h2>NGO Dashboard</h2>
     <div class="total-balance" id="totalBalance"></div>
@@ -42,8 +80,14 @@
           <input type="text" id="newUsername" required>
         </div>
         <div class="form-group">
-          <label>Picture URL</label>
-          <input type="text" id="newPic" required>
+          <label>Picture</label>
+          <select id="newPic" required>
+            <option value="">Select a picture</option>
+            <option value="img/nomsa.jpeg">Nomsa's Photo</option>
+            <option value="img/james.jpeg">James's Photo</option>
+            <option value="img/maria.jpeg">Maria's Photo</option>
+            <option value="https://placehold.co/48x48?text=U">Generic User</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Description</label>
@@ -68,15 +112,30 @@
       let html = '';
       clients.forEach(person => {
         total += person.balance || 0;
+        
+        // Handle image display with proper fallbacks
+        let imageSrc = person.picture || 'https://placehold.co/48x48?text=' + person.name.charAt(0);
+        
+        // If it's a local image path, make sure it's accessible
+        if (imageSrc.startsWith('img/')) {
+          // Local image - should work fine
+        } else if (imageSrc.startsWith('http')) {
+          // External URL - keep as is
+        } else {
+          // Fallback to placeholder with person's initial
+          imageSrc = 'https://placehold.co/48x48?text=' + person.name.charAt(0);
+        }
+        
         html += `
           <div class="client-card">
-            <img src="${person.picture || 'https://placehold.co/48x48'}" class="client-photo" />
+            <img src="${imageSrc}" class="client-photo" onerror="this.src='https://placehold.co/48x48?text=${person.name.charAt(0)}'" />
             <div class="client-info">
               <div class="client-name">${person.name} <span style="color:#888;">(@${person.username})</span></div>
               <div>${person.description || ''}</div>
               <form class="withdraw-form" onsubmit="return withdraw('${person.username}', this)">
                 <input type="number" min="1" step="1" name="amount" placeholder="Withdraw" required>
                 <button type="submit" class="add-btn" style="padding:4px 10px;">Withdraw</button>
+                <button type="button" class="delete-btn" onclick="deletePerson('${person.username}', '${person.name}')">Delete</button>
               </form>
             </div>
             <div class="client-balance">R${(person.balance||0).toFixed(2)}</div>
@@ -134,6 +193,30 @@
         alert(data.error || 'Error withdrawing');
       }
       return false;
+    }
+
+    window.deletePerson = async function(username, name) {
+      if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone and will remove all their donation history.`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/people/${username}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert(`${name} has been successfully deleted.`);
+          loadClients(); // Refresh the client list
+        } else {
+          alert(data.error || 'Error deleting person');
+        }
+      } catch (error) {
+        console.error('Error deleting person:', error);
+        alert('Error deleting person. Please try again.');
+      }
     }
   </script>
 </body>

@@ -374,6 +374,29 @@ app.post('/api/people', (req: Request, res: Response): void => {
   res.json({ success: true, data: newPerson })
 })
 
+// ✅ NEW: Delete person by username
+app.delete('/api/people/:username', (req: Request, res: Response): void => {
+  try {
+    const { username } = req.params
+    const people = readPeople()
+    const personIndex = people.findIndex((p: any) => p.username === username)
+    
+    if (personIndex === -1) {
+      res.status(404).json({ error: 'Person not found' })
+      return
+    }
+    
+    const deletedPerson = people.splice(personIndex, 1)[0]
+    writePeople(people)
+    
+    console.log(`✅ Deleted person: ${deletedPerson.name} (${username})`)
+    res.json({ success: true, message: `Successfully deleted ${deletedPerson.name}` })
+  } catch (error) {
+    console.error('Error deleting person:', error)
+    res.status(500).json({ error: 'Failed to delete person' })
+  }
+})
+
 // ✅ NEW: Withdraw amount from person's balance
 app.post("/api/withdraw", (req: Request, res: Response): void => {
   try {
@@ -424,6 +447,7 @@ app.use((req: Request, res: Response) => {
       "GET /api/people",
       "GET /api/people/:username",
       "POST /api/people",
+      "DELETE /api/people/:username",
       "POST /api/withdraw",
       "POST /api/create-incoming-payment",
       "POST /api/create-quote",
