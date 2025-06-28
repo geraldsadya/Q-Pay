@@ -265,16 +265,16 @@
     <script>
         // Configuration
         const CONFIG = {
-            API_BASE_URL: "https://9986-196-47-254-243.ngrok-free.app",
+            API_BASE_URL: "http://localhost:3001",
             DONOR_WALLET: "$ilp.interledger-test.dev/zars",
             RECEIVER_WALLET: "$ilp.interledger-test.dev/abo1",
-            REDIRECT_URL: "https://9986-196-47-254-243.ngrok-free.app/success.html",
+            REDIRECT_URL: "http://localhost:3001/success.html",
         }
 
         function getPersonId() {
-            const path = window.location.pathname
-            const match = path.match(/\/donate-person\/(.+)/)
-            return match ? match[1] : "nomsa123"
+            const path = window.location.pathname;
+            const match = path.match(/\/donate-person\/(.+)/);
+            return match ? match[1] : "nomsa123";
         }
 
         // Initialize the page
@@ -284,30 +284,48 @@
             setupEventListeners()
         })
 
-        function updatePersonInfo(personId) {
-            const personData = {
-                nomsa123: {
-                    name: "Nomsa",
-                    story: "Help Nomsa get back on her feet. Every donation makes a difference in providing essential needs like food, shelter, and support.",
-                    photo: "👩",
-                },
-                steve456: {
-                    name: "Steve",
-                    story: "Support Steve, a veteran working hard to rebuild his life. Your donation helps him find stable housing and employment.",
-                    photo: "👨",
-                },
-                kuhle789: {
-                    name: "Kuhle",
-                    story: "Help Kuhle continue her education and build a better future. Your support keeps her in school and working towards her dreams.",
-                    photo: "👧",
-                },
+        async function updatePersonInfo(personId) {
+            try {
+                // Fetch person data from the API
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/people/${personId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch person data');
+                }
+                
+                const person = await response.json();
+                
+                // Update the UI with the fetched person data
+                document.getElementById("personName").textContent = person.name;
+                document.getElementById("personStory").textContent = person.description || "Help this person get back on their feet. Every donation makes a difference.";
+                document.getElementById("personPhoto").textContent = person.picture || "👤";
+                
+            } catch (error) {
+                console.error("Error fetching person data:", error);
+                // Fallback to default person data
+                const personData = {
+                    nomsa123: {
+                        name: "Nomsa",
+                        story: "Help Nomsa get back on her feet. Every donation makes a difference in providing essential needs like food, shelter, and support.",
+                        photo: "👩",
+                    },
+                    steve456: {
+                        name: "Steve",
+                        story: "Support Steve, a veteran working hard to rebuild his life. Your donation helps him find stable housing and employment.",
+                        photo: "👨",
+                    },
+                    kuhle789: {
+                        name: "Kuhle",
+                        story: "Help Kuhle continue her education and build a better future. Your support keeps her in school and working towards her dreams.",
+                        photo: "👧",
+                    },
+                }
+
+                const fallbackPerson = personData[personId] || personData["nomsa123"];
+                document.getElementById("personName").textContent = fallbackPerson.name;
+                document.getElementById("personStory").textContent = fallbackPerson.story;
+                document.getElementById("personPhoto").textContent = fallbackPerson.photo;
             }
-
-            const person = personData[personId] || personData["nomsa123"]
-
-            document.getElementById("personName").textContent = person.name
-            document.getElementById("personStory").textContent = person.story
-            document.getElementById("personPhoto").textContent = person.photo
         }
 
         function setupEventListeners() {

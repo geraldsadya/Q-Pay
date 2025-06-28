@@ -325,40 +325,28 @@ app.post("/api/outgoing-payment", async (req: Request, res: Response): Promise<a
   }
 })
 
-// ✅ NEW: Get all balances endpoint
-app.get("/api/balances", (req: Request, res: Response): void => {
-  try {
-    const { getAllBalances } = require("./utils/balanceManager")
-    const balances = getAllBalances()
-    res.json({ success: true, data: balances })
-  } catch (error) {
-    console.error("Error getting balances:", error)
-    res.status(500).json({ error: "Failed to get balances" })
-  }
-})
-
-// ✅ NEW: Get specific person's balance
-app.get("/api/balances/:personId", (req: Request, res: Response): void => {
-  try {
-    const { personId } = req.params
-    const { getBalance } = require("./utils/balanceManager")
-    const balance = getBalance(personId)
-    
-    if (!balance) {
-      res.status(404).json({ error: "Person not found" })
-      return
-    }
-    
-    res.json({ success: true, data: balance })
-  } catch (error) {
-    console.error("Error getting balance:", error)
-    res.status(500).json({ error: "Failed to get balance" })
-  }
-})
-
 // ✅ NEW: People API endpoints
 app.get('/api/people', (req: Request, res: Response): void => {
   res.json({ success: true, data: readPeople() })
+})
+
+// ✅ NEW: Get specific person by username
+app.get('/api/people/:username', (req: Request, res: Response): void => {
+  try {
+    const { username } = req.params
+    const people = readPeople()
+    const person = people.find((p: any) => p.username === username)
+    
+    if (!person) {
+      res.status(404).json({ error: 'Person not found' })
+      return
+    }
+    
+    res.json({ success: true, data: person })
+  } catch (error) {
+    console.error('Error getting person:', error)
+    res.status(500).json({ error: 'Failed to get person' })
+  }
 })
 
 app.post('/api/people', (req: Request, res: Response): void => {
@@ -433,8 +421,9 @@ app.use((req: Request, res: Response) => {
       "GET /upload",
       "POST /api/qpay-donation",
       "POST /api/complete-payment",
-      "GET /api/balances",
-      "GET /api/balances/:personId",
+      "GET /api/people",
+      "GET /api/people/:username",
+      "POST /api/people",
       "POST /api/withdraw",
       "POST /api/create-incoming-payment",
       "POST /api/create-quote",

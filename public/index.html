@@ -1,124 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Q-Pay</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 600px;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .option-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-            border-color: #667eea;
-        }
-
-        .option-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-
-        .option-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .option-description {
-            color: #666;
-            line-height: 1.5;
-        }
-
-        @media (max-width: 768px) {
-            .welcome-header h1 {
-                font-size: 2.5rem;
-            }
-            
-            .welcome-header p {
-                font-size: 1.1rem;
-            }
-            
-            .options-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .option-card {
-                padding: 30px 20px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Q-Pay</title>
+  <link rel="stylesheet" href="index.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Q-Pay</h1>
-        <p style="color: #666; font-size: 1.1em; margin-bottom: 40px;">
-            Empowering donations through secure digital payments
-        </p>
-        
-        <div class="options">
-            <div class="option-card" onclick="window.location.href='/donate'">
-                <div class="option-icon">🤝</div>
-                <div class="option-title">Are you a donor?</div>
-                <div class="option-description">
-                    Make a donation to help someone in need
-                </div>
-            </div>
-            
-            <div class="option-card" onclick="window.location.href='/ngo-login'">
-                <div class="option-icon">🏢</div>
-                <div class="option-title">Are you an NGO?</div>
-                <div class="option-description">
-                    Manage clients and track donations
-                </div>
-            </div>
-        </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="container flex-between">
+      <div class="brand">
+        <div class="logo-icon">❤️</div>
+        <span class="brand-name">Q-Pay</span>
+      </div>
+      <nav>
+        <a href="/ngo-login.html" class="nav-link">Vendor Portal</a>
+      </nav>
     </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero text-center">
+    <h1 class="hero-title">
+      Purpose-Bound <span class="gradient-text">Donations</span>
+    </h1>
+    <p class="hero-subtitle">
+      Scan. Donate. Empower lives with secure, purposeful giving through verified vendors and trusted shelters.
+    </p>
+    <div class="button-group">
+      <button class="btn primary" onclick="window.location.href='/donate-selection.html'">
+        <span class="icon">🛡️</span> Are you a donor?
+      </button>
+      <button class="btn outline" onclick="window.location.href='/ngo-login.html'">Are you an NGO?</button>
+    </div>
+  </section>
+
+  <!-- Image Carousel -->
+  <div class="carousel">
+    <div class="carousel-track">
+      <img src="/img/image1.jpeg" alt="Slide 1" />
+      <img src="/img/image2.jpg" alt="Slide 2" />
+      <img src="/img/image3.avif" alt="Slide 3" />
+      <img src="/img/image4.png" alt="Slide 4" />
+      <img src="/img/image5.jpg" alt="Slide 5" />
+    </div>
+  </div>
+
+  <!-- Demo Residents -->
+  <section class="residents">
+    <h2>Meet Our Residents</h2>
+    <p class="subtext">Click a resident below to learn their story and contribute directly</p>
+    <div class="resident-cards">
+      <a href="/donate-person/nomsa123" class="resident-card">
+        <img src="img/nomsa.jpeg" alt="Nomsa" class="resident-photo" />
+        <h3>Nomsa</h3>
+        <p>Single mother seeking stable housing</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+      <a href="/donate-person/steve456" class="resident-card">
+        <img src="img/steve.jpeg" alt="Steve" class="resident-photo" />
+        <h3>Steve</h3>
+        <p>Veteran working towards independence</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+      <a href="/donate-person/kuhle789" class="resident-card">
+        <img src="img/kuhle.jpeg" alt="Kuhle" class="resident-photo" />
+        <h3>Kuhle</h3>
+        <p>Student overcoming housing challenges</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="features">
+    <h2>How It Works</h2>
+    <div class="feature-cards">
+      <div class="feature">
+        <div class="feature-icon">📷</div>
+        <h3>Scan QR Code</h3>
+        <p>Each resident has a unique QR code linking directly to their donation portal.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <h3>Purpose-Bound Donations</h3>
+        <p>Funds are restricted to essential categories like food, hygiene, and transport.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⏰</div>
+        <h3>Smart Expiry</h3>
+        <p>Unused funds expire after a set period to prevent misuse or hoarding.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta text-center">
+    <h2>Get Involved</h2>
+    <p>
+      Are you a shelter or organization working with the homeless? Register with DigniPay to empower your
+      residents through secure, traceable donations.
+    </p>
+    <div class="button-group">
+      <button class="btn primary" onclick="window.location.href='/ngo-login.html'"><span class="icon">👥</span> Register Your Shelter</button>
+      <button class="btn outline" onclick="window.location.href='/donate-selection.html'"><span class="icon">🤝</span> Become a Donor</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>&copy; <span id="year"></span> DigniPay. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </footer>
+
+  <script src="index.js" defer></script>
 </body>
 </html>

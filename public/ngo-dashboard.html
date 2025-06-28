@@ -109,7 +109,7 @@
         loadClients();
         document.getElementById('addForm').style.display = 'none';
         // Show QR code
-        const url = 'https://9986-196-47-254-243.ngrok-free.app/donate-person/' + username;
+        const url = 'http://localhost:3001/donate-person/' + username;
         document.getElementById('qrSection').style.display = '';
         document.getElementById('qrLink').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
         new QRious({ element: document.getElementById('qrCode'), value: url, size: 180 });

@@ -284,7 +284,7 @@
 
                 // Send completion request to backend
                 console.log('Sending payment completion request...');
-                const response = await fetch('https://9986-196-47-254-243.ngrok-free.app/api/complete-payment', {
+                const response = await fetch('http://localhost:3001/api/complete-payment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
