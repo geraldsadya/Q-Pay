@@ -34,5 +34,14 @@
     "balance": 8.88,
     "createdAt": "2025-06-28T04:57:45.097Z",
     "lastUpdated": "2025-06-28T05:55:36.241Z"
+  },
+  {
+    "name": "Gerald Sadya",
+    "username": "gerry123",
+    "picture": "https://interledger.jpg",
+    "description": "Woke up without a house.",
+    "balance": 0,
+    "createdAt": "2025-06-28T06:26:52.841Z",
+    "lastUpdated": "2025-06-28T06:26:52.841Z"
   }
 ]

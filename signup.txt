@@ -15,6 +15,7 @@ const AppDataSource = new DataSource({
     entities: [HomelessPerson],
 });
 
+
 // Initialize database
 AppDataSource.initialize()
     .then(() => console.log("Database connected"))

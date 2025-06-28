@@ -265,10 +265,10 @@
     <script>
         // Configuration
         const CONFIG = {
-            API_BASE_URL: "http://localhost:3001",
+            API_BASE_URL: "https://9986-196-47-254-243.ngrok-free.app",
             DONOR_WALLET: "$ilp.interledger-test.dev/zars",
             RECEIVER_WALLET: "$ilp.interledger-test.dev/abo1",
-            REDIRECT_URL: window.location.origin + "/success.html",
+            REDIRECT_URL: "https://9986-196-47-254-243.ngrok-free.app/success.html",
         }
 
         function getPersonId() {
@@ -421,7 +421,7 @@
             const donationData = {
                 receiverWallet: CONFIG.RECEIVER_WALLET,
                 donorWallet: CONFIG.DONOR_WALLET,
-                amount: formData.amount.toString(),
+                amount: (parseFloat(formData.amount) * 100).toString(), // Convert to cents
                 redirectUrl: CONFIG.REDIRECT_URL,
                 metadata: {
                     donorName: formData.donorName,
