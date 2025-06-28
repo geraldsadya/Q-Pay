@@ -1,0 +1,120 @@
+import 'reflect-metadata';
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import { generateQRCode } from './qr-generator';
+import { DataSource } from 'typeorm';
+import { HomelessPerson } from './entity/HomelessPerson';
+
+// Database setup
+const AppDataSource = new DataSource({
+    type: "sqlite",
+    database: "database.sqlite",
+    synchronize: true,
+    logging: true,
+    entities: [HomelessPerson],
+});
+
+// Initialize database
+AppDataSource.initialize()
+    .then(() => console.log("Database connected"))
+    .catch(error => console.log("Database error:", error));
+
+const app = express();
+const port = 3000;
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+
+// Middleware
+app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.json());
+
+// CORS for development
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
+
+// Handle signup form submission
+app.post('/signup', upload.single('picture'), async (req, res) => {
+    try {
+        const { name, surname, walletId } = req.body;
+        const picture = req.file;
+
+        if (!name || !surname || !walletId || !picture) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        // Clean and format wallet ID
+        const cleanWalletId = walletId
+            .replace(/^\$/, '')
+            .replace(/^https?:\/\//, '')
+            .replace(/\/$/, '');
+        const walletUrl = `https://${cleanWalletId}`;
+
+        // Generate QR code
+        const qrCode = await generateQRCode(walletUrl);
+
+        // Save to database
+        const personRepository = AppDataSource.getRepository(HomelessPerson);
+        const newPerson = new HomelessPerson();
+        newPerson.name = name;
+        newPerson.surname = surname;
+        newPerson.walletId = walletId;
+        newPerson.picturePath = picture.path;
+
+        await personRepository.save(newPerson);
+        console.log('Saved to database:', newPerson);
+
+        return res.json({
+            message: 'Signup successful',
+            qrCode: qrCode,
+            walletUrl: walletUrl,
+            personId: newPerson.id
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({ 
+            error: 'Processing failed',
+            //details: error.message 
+        });
+    }
+});
+
+// Get all homeless persons (for admin view)
+app.get('/persons', async (req, res) => {
+    try {
+        const personRepository = AppDataSource.getRepository(HomelessPerson);
+        const persons = await personRepository.find();
+        res.json(persons);
+    } catch (error) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../public/index.html'));
+});
+
+app.get('/ngo-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../public/ngo-dashboard.html'));
+});
+
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../public/signup.html'));
+});

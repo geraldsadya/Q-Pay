@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Nomsa",
+    "username": "nomsa123",
+    "picture": "https://placehold.co/48x48?text=N",
+    "description": "Nomsa lost her home in a fire. She is working hard to rebuild her life.",
+    "balance": 50,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T03:49:23.254Z"
+  },
+  {
+    "name": "Steve",
+    "username": "steve456",
+    "picture": "https://placehold.co/48x48?text=S",
+    "description": "Steve is a talented artist who dreams of having his own studio.",
+    "balance": 90,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T03:50:51.391Z"
+  },
+  {
+    "name": "Kuhle",
+    "username": "kuhle789",
+    "picture": "https://placehold.co/48x48?text=K",
+    "description": "Kuhle is a student who needs help to finish her education.",
+    "balance": 0,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T02:00:00.000Z"
+  },
+  {
+    "name": "BRO",
+    "username": "broman",
+    "picture": "https://interledger.jpg",
+    "description": "One leg",
+    "balance": 8.88,
+    "createdAt": "2025-06-28T04:57:45.097Z",
+    "lastUpdated": "2025-06-28T05:55:36.241Z"
+  }
+]

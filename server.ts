@@ -13,6 +13,7 @@ import {
   initiateQPayDonation,
   completePaymentAfterAuth, // ✅ NEW: Import the completion function
 } from "./open-payments"
+import fs from 'fs'
 
 // Initialize express app
 const app = express()
@@ -32,16 +33,39 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, "./public")))
 
 // Root endpoint
-app.get("/", (_, res) => res.sendFile(path.join(__dirname, "public", "index.html")))
+app.get("/", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "index.html"))
+})
 
 // Donation selection page
-app.get("/donate", (_, res) => res.sendFile(path.join(__dirname, "public", "donate-selection.html")))
+app.get("/donate", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "donate-selection.html"))
+})
 
 // Individual donation page
-app.get("/donate-person/:personId", (_, res) => res.sendFile(path.join(__dirname, "public", "donate-person.html")))
+app.get("/donate-person/:personId", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "donate-person.html"))
+})
 
-// Upload page (placeholder for now)
-app.get("/upload", (_, res) => res.sendFile(path.join(__dirname, "public", "upload.html")))
+// Upload user page
+app.get("/upload", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "upload.html"))
+})
+
+// ✅ NEW: NGO login page
+app.get("/ngo-login", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "ngo-login.html"))
+})
+
+// ✅ NEW: NGO dashboard page
+app.get("/ngo-dashboard", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "ngo-dashboard.html"))
+})
+
+// ✅ NEW: Balance dashboard page
+app.get("/balances", (req: Request, res: Response): void => {
+  res.sendFile(path.join(__dirname, "public", "balances.html"))
+})
 
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
@@ -86,6 +110,24 @@ app.post("/api/complete-payment", async (req: Request, res: Response): Promise<a
 
     console.log("✅ Payment completed successfully")
     console.log("Result:", JSON.stringify(result, null, 2))
+
+    // ✅ NEW: Add donation to person's balance
+    if (metadata && metadata.homelessPersonId) {
+      const amount = parseFloat(result.receiveAmount.value) / Math.pow(10, result.receiveAmount.assetScale)
+      
+      // Update balance in people.json instead of old balance system
+      const people = readPeople()
+      const person = people.find((p: any) => p.username === metadata.homelessPersonId)
+      if (person) {
+        person.balance = (person.balance || 0) + amount
+        person.lastUpdated = new Date().toISOString()
+        writePeople(people)
+        console.log(`Added R${amount} to ${person.name}'s balance. New balance: R${person.balance}`)
+        console.log(`✅ Updated balance for ${metadata.homelessPersonId}:`, person)
+      } else {
+        console.log(`❌ Person ${metadata.homelessPersonId} not found in people database`)
+      }
+    }
 
     return res.status(200).json({
       success: true,
@@ -283,6 +325,100 @@ app.post("/api/outgoing-payment", async (req: Request, res: Response): Promise<a
   }
 })
 
+// ✅ NEW: Get all balances endpoint
+app.get("/api/balances", (req: Request, res: Response): void => {
+  try {
+    const { getAllBalances } = require("./utils/balanceManager")
+    const balances = getAllBalances()
+    res.json({ success: true, data: balances })
+  } catch (error) {
+    console.error("Error getting balances:", error)
+    res.status(500).json({ error: "Failed to get balances" })
+  }
+})
+
+// ✅ NEW: Get specific person's balance
+app.get("/api/balances/:personId", (req: Request, res: Response): void => {
+  try {
+    const { personId } = req.params
+    const { getBalance } = require("./utils/balanceManager")
+    const balance = getBalance(personId)
+    
+    if (!balance) {
+      res.status(404).json({ error: "Person not found" })
+      return
+    }
+    
+    res.json({ success: true, data: balance })
+  } catch (error) {
+    console.error("Error getting balance:", error)
+    res.status(500).json({ error: "Failed to get balance" })
+  }
+})
+
+// ✅ NEW: People API endpoints
+app.get('/api/people', (req: Request, res: Response): void => {
+  res.json({ success: true, data: readPeople() })
+})
+
+app.post('/api/people', (req: Request, res: Response): void => {
+  const { name, username, picture, description } = req.body
+  if (!name || !username) {
+    res.status(400).json({ error: 'Missing fields' })
+    return
+  }
+  const people = readPeople()
+  if (people.find((p: any) => p.username === username)) {
+    res.status(400).json({ error: 'Username exists' })
+    return
+  }
+  const newPerson = { 
+    name, 
+    username, 
+    picture, 
+    description, 
+    balance: 0, 
+    createdAt: new Date().toISOString(), 
+    lastUpdated: new Date().toISOString() 
+  }
+  people.push(newPerson)
+  writePeople(people)
+  res.json({ success: true, data: newPerson })
+})
+
+// ✅ NEW: Withdraw amount from person's balance
+app.post("/api/withdraw", (req: Request, res: Response): void => {
+  try {
+    const { username, amount } = req.body
+    
+    if (!username || !amount) {
+      res.status(400).json({ error: "username and amount are required" })
+      return
+    }
+    
+    const people = readPeople()
+    const person = people.find((p: any) => p.username === username)
+    if (!person) {
+      res.status(404).json({ error: "Person not found" })
+      return
+    }
+    if (person.balance < amount) {
+      res.status(400).json({ error: "Insufficient balance" })
+      return
+    }
+    person.balance -= amount
+    person.lastUpdated = new Date().toISOString()
+    writePeople(people)
+    res.json({ success: true, data: person })
+  } catch (error) {
+    console.error("Error processing withdrawal:", error)
+    res.status(500).json({ error: "Failed to process withdrawal" })
+  }
+})
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
+
 // ============== ERROR HANDLING ==============
 
 // 404 (catch-all)
@@ -292,8 +428,14 @@ app.use((req: Request, res: Response) => {
     message: `The endpoint ${req.method} ${req.originalUrl} does not exist`,
     availableEndpoints: [
       "GET /",
+      "GET /donate",
+      "GET /donate-person/:personId",
+      "GET /upload",
       "POST /api/qpay-donation",
-      "POST /api/complete-payment", // ✅ NEW
+      "POST /api/complete-payment",
+      "GET /api/balances",
+      "GET /api/balances/:personId",
+      "POST /api/withdraw",
       "POST /api/create-incoming-payment",
       "POST /api/create-quote",
       "POST /api/outgoing-payment-auth",
@@ -328,5 +470,15 @@ app.listen(PORT, () => {
   console.log("  POST   /api/outgoing-payment-auth    - Get continuation grant for outgoing payment")
   console.log("  POST   /api/outgoing-payment         - Create outgoing payment resource")
 })
+
+const PEOPLE_FILE = path.join(__dirname, 'data/people.json')
+
+// Helper to read/write people
+function readPeople(): any[] {
+  try { return JSON.parse(fs.readFileSync(PEOPLE_FILE, 'utf8')) } catch { return [] }
+}
+function writePeople(people: any[]): void {
+  fs.writeFileSync(PEOPLE_FILE, JSON.stringify(people, null, 2))
+}
 
 export default app

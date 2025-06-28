@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NGO Login - Q-Pay</title>
+  <style>
+    body { font-family: sans-serif; background: #f3f4f6; }
+    .container { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);}
+    h2 { text-align: center; margin-bottom: 24px; }
+    .form-group { margin-bottom: 18px; }
+    label { font-weight: 600; }
+    input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; }
+    button { width: 100%; padding: 12px; background: #667eea; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    button:hover { background: #5a67d8; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>NGO Login / Signup</h2>
+    <form id="ngoLoginForm">
+      <div class="form-group">
+        <label for="ngoName">NGO Name</label>
+        <input type="text" id="ngoName" required>
+      </div>
+      <div class="form-group">
+        <label for="ngoPass">Password</label>
+        <input type="password" id="ngoPass" required>
+      </div>
+      <button type="submit">Login / Signup</button>
+    </form>
+  </div>
+  <script>
+    document.getElementById('ngoLoginForm').onsubmit = function(e) {
+      e.preventDefault();
+      window.location.href = '/ngo-dashboard';
+    }
+  </script>
+</body>
+</html> 
