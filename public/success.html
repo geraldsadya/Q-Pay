@@ -210,68 +210,45 @@
     </div>
 
     <script>
-        console.log('Success page loaded');
-        
-        // Show debug info in development
         const isDev = window.location.hostname === 'localhost';
         if (isDev) {
-            // Hide debug info by default
             document.getElementById('debug-info').style.display = 'none';
         }
 
         async function completePayment() {
             try {
-                // Extract URL parameters
                 const urlParams = new URLSearchParams(window.location.search);
                 const hash = urlParams.get('hash');
                 const interact_ref = urlParams.get('interact_ref');
 
-                console.log('URL Parameters:', { hash, interact_ref });
-
-                // Get stored payment data from sessionStorage
                 const storedData = sessionStorage.getItem('qpayPaymentData');
-                console.log('Stored payment data:', storedData);
 
                 if (!storedData) {
-                    // Try to get from localStorage as backup
                     const backupData = localStorage.getItem('qpayPaymentData');
-                    console.log('Backup data from localStorage:', backupData);
                     
                     if (!backupData) {
-                        // Show available storage for debugging
-                        console.log('Available sessionStorage keys:', Object.keys(sessionStorage));
-                        console.log('Available localStorage keys:', Object.keys(localStorage));
-                        
                         throw new Error('No payment data found in session storage or localStorage. Please restart the payment flow.');
                     }
                     
-                    // Use backup data
                     sessionStorage.setItem('qpayPaymentData', backupData);
                     storedData = backupData;
                 }
 
                 const paymentData = JSON.parse(storedData);
-                console.log('Parsed payment data:', paymentData);
 
-                // ✅ FIXED: Use interact_ref from URL, not hash
                 if (!interact_ref) {
                     throw new Error('Missing interact_ref parameter in URL');
                 }
 
-                // Prepare completion payload
                 const completionPayload = {
                     continueUri: paymentData.continueUri,
                     continueAccessToken: paymentData.continueAccessToken,
-                    interactRef: interact_ref, // ✅ FIXED: Use interact_ref from URL
+                    interactRef: interact_ref,
                     quoteId: paymentData.quoteId,
                     senderWalletAddress: paymentData.senderWalletAddress || paymentData.donorWalletAddress,
                     metadata: paymentData.metadata
                 };
 
-                console.log('Sending completion payload:', completionPayload);
-
-                // Send completion request to backend
-                console.log('Sending payment completion request...');
                 const response = await fetch('http://localhost:3001/api/complete-payment', {
                     method: 'POST',
                     headers: {
@@ -280,26 +257,18 @@
                     body: JSON.stringify(completionPayload)
                 });
 
-                console.log('Response status:', response.status);
                 const result = await response.json();
-                console.log('Response data:', result);
 
                 if (response.ok && result.success) {
-                    // Success!
                     showSuccess(result.data);
-                    
-                    // Clear session storage
                     sessionStorage.removeItem('qpayPaymentData');
-                    
-                    console.log('✅ Payment completed successfully');
                 } else {
-                    // Error from backend
                     const errorMsg = result.message || result.error || 'Payment completion failed';
                     throw new Error(errorMsg);
                 }
 
             } catch (error) {
-                console.error('❌ Payment completion error:', error);
+                console.error('Payment completion error:', error);
                 showError(error.message, error);
             }
         }
@@ -309,7 +278,6 @@
             document.getElementById('error-state').style.display = 'none';
             document.getElementById('success-state').style.display = 'block';
 
-            // Populate payment details
             const detailsContainer = document.getElementById('payment-details');
             detailsContainer.innerHTML = `
                 <div class="details-title">Payment Details</div>
@@ -341,7 +309,6 @@
 
             document.getElementById('error-message').textContent = message;
 
-            // Show error details if available
             if (error && (error.details || error.stack)) {
                 const errorDetailsContainer = document.getElementById('error-details');
                 errorDetailsContainer.style.display = 'block';
@@ -350,22 +317,17 @@
         }
 
         function retryPayment() {
-            // Reset UI and try again
             document.getElementById('error-state').style.display = 'none';
             document.getElementById('loading-state').style.display = 'block';
             setTimeout(completePayment, 1000);
         }
 
-        // Start the payment completion process when page loads
         window.addEventListener('load', () => {
-            console.log('Window loaded, starting payment completion...');
             completePayment();
         });
 
-        // Handle page visibility changes (in case user switches tabs)
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                console.log('Page became visible');
             }
         });
     </script>

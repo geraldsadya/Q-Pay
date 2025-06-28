@@ -258,87 +258,92 @@
             kuhle789: { name: "Kuhle", photo: "👧" }
         };
 
-        // Load balances on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadBalances();
         });
 
         async function loadBalances() {
             try {
-                const response = await fetch('/api/balances');
+                const response = await fetch('http://localhost:3001/api/people');
                 const result = await response.json();
                 
                 if (result.success) {
                     displayBalances(result.data);
                 } else {
-                    showMessage('Failed to load balances', 'error');
+                    throw new Error('Failed to load balances');
                 }
             } catch (error) {
                 console.error('Error loading balances:', error);
-                showMessage('Error loading balances', 'error');
+                document.getElementById('balanceGrid').innerHTML = '<p>Error loading balances. Please try again.</p>';
             }
         }
 
-        function displayBalances(balances) {
-            const grid = document.getElementById('balanceGrid');
-            grid.innerHTML = '';
-            
-            Object.keys(balances).forEach(personId => {
-                const balance = balances[personId];
-                const person = personData[personId];
-                
-                if (person) {
-                    const card = document.createElement('div');
-                    card.className = 'balance-card';
-                    card.innerHTML = `
-                        <div class="person-info">
-                            <div class="person-photo">${person.photo}</div>
-                            <div class="person-name">${person.name}</div>
-                        </div>
-                        <div class="balance-amount">R${balance.balance.toFixed(2)}</div>
-                        <div class="balance-label">Current Balance</div>
-                        <div class="last-updated">Last updated: ${new Date(balance.lastUpdated).toLocaleString()}</div>
-                    `;
-                    grid.appendChild(card);
-                }
+        function displayBalances(people) {
+            const container = document.getElementById('balanceGrid');
+            container.innerHTML = '';
+
+            let totalBalance = 0;
+
+            people.forEach(person => {
+                const balance = person.balance || 0;
+                totalBalance += balance;
+
+                const balanceCard = document.createElement('div');
+                balanceCard.className = 'balance-card';
+                balanceCard.innerHTML = `
+                    <div class="person-info">
+                        <h3>${person.name}</h3>
+                        <p>@${person.username}</p>
+                    </div>
+                    <div class="balance-info">
+                        <div class="balance-amount">R${balance.toFixed(2)}</div>
+                        <form class="withdraw-form" onsubmit="return handleWithdrawal('${person.username}', this)">
+                            <input type="number" name="amount" min="1" step="0.01" placeholder="Amount" required>
+                            <button type="submit">Withdraw</button>
+                        </form>
+                    </div>
+                `;
+                container.appendChild(balanceCard);
             });
+
+            const totalElement = document.createElement('div');
+            totalElement.className = 'total-balance';
+            totalElement.textContent = `Total Balance: R${totalBalance.toFixed(2)}`;
+            container.appendChild(totalElement);
         }
 
-        // Handle withdrawal form
-        document.getElementById('withdrawalForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const personId = document.getElementById('personSelect').value;
-            const amount = parseFloat(document.getElementById('withdrawAmount').value);
-            
-            if (!personId || !amount) {
-                showMessage('Please fill in all fields', 'error');
-                return;
+        async function handleWithdrawal(username, form) {
+            const amount = parseFloat(form.amount.value);
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return false;
             }
-            
+
             try {
-                const response = await fetch('/api/withdraw', {
+                const response = await fetch('http://localhost:3001/api/withdraw', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ personId, amount })
+                    body: JSON.stringify({ username, amount }),
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    showMessage(`Successfully withdrew R${amount} from ${personData[personId].name}`, 'success');
-                    document.getElementById('withdrawalForm').reset();
-                    loadBalances(); // Refresh balances
+                    alert(`Successfully withdrew R${amount} from ${username}`);
+                    form.amount.value = '';
+                    loadBalances();
                 } else {
-                    showMessage(result.error || 'Withdrawal failed', 'error');
+                    alert(result.error || 'Withdrawal failed');
                 }
             } catch (error) {
                 console.error('Error processing withdrawal:', error);
-                showMessage('Error processing withdrawal', 'error');
+                alert('Error processing withdrawal. Please try again.');
             }
-        });
+
+            return false;
+        }
 
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');

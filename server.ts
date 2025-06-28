@@ -1,5 +1,3 @@
-// ===== UPDATED server.js =====
-
 import express, { type Request, type Response, type NextFunction } from "express"
 import cors from "cors"
 import path from "path"
@@ -11,15 +9,13 @@ import {
   createOutgoingPaymentPendingGrant,
   getWalletAddressInfo,
   initiateQPayDonation,
-  completePaymentAfterAuth, // ✅ NEW: Import the completion function
+  completePaymentAfterAuth,
 } from "./open-payments"
 import fs from 'fs'
 
-// Initialize express app
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// Middleware
 app.use(
   cors({
     origin: "*",
@@ -32,42 +28,34 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, "./public")))
 
-// Root endpoint
 app.get("/", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "index.html"))
 })
 
-// Donation selection page
 app.get("/donate", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "donate-selection.html"))
 })
 
-// Individual donation page
 app.get("/donate-person/:personId", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "donate-person.html"))
 })
 
-// Upload user page
 app.get("/upload", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "upload.html"))
 })
 
-// ✅ NEW: NGO login page
 app.get("/ngo-login", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "ngo-login.html"))
 })
 
-// ✅ NEW: NGO dashboard page
 app.get("/ngo-dashboard", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "ngo-dashboard.html"))
 })
 
-// ✅ NEW: Balance dashboard page
 app.get("/balances", (req: Request, res: Response): void => {
   res.sendFile(path.join(__dirname, "public", "balances.html"))
 })
 
-// Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
     status: "healthy",
@@ -77,16 +65,10 @@ app.get("/api/health", (req: Request, res: Response) => {
   })
 })
 
-// ✅ NEW: Payment completion endpoint - THIS WAS MISSING!
 app.post("/api/complete-payment", async (req: Request, res: Response): Promise<any> => {
   const { continueUri, continueAccessToken, interactRef, quoteId, senderWalletAddress, metadata } = req.body
 
-  console.log("=== Complete Payment Debug ===")
-  console.log("Request body:", JSON.stringify(req.body, null, 2))
-
-  // Basic validation
   if (!continueUri || !continueAccessToken || !interactRef || !quoteId || !senderWalletAddress) {
-    console.log("❌ Validation failed - missing required fields")
     return res.status(400).json({
       error: "Validation failed",
       message: "continueUri, continueAccessToken, interactRef, quoteId, and senderWalletAddress are required",
@@ -95,10 +77,7 @@ app.post("/api/complete-payment", async (req: Request, res: Response): Promise<a
   }
 
   try {
-    console.log("Step 1: Creating authenticated client...")
     const client = await getAuthenticatedClient()
-
-    console.log("Step 2: Completing payment after authorization...")
     const result = await completePaymentAfterAuth(client, {
       continueUri,
       continueAccessToken,
@@ -108,24 +87,15 @@ app.post("/api/complete-payment", async (req: Request, res: Response): Promise<a
       metadata,
     })
 
-    console.log("✅ Payment completed successfully")
-    console.log("Result:", JSON.stringify(result, null, 2))
-
-    // ✅ NEW: Add donation to person's balance
     if (metadata && metadata.homelessPersonId) {
       const amount = parseFloat(result.receiveAmount.value) / Math.pow(10, result.receiveAmount.assetScale)
       
-      // Update balance in people.json instead of old balance system
       const people = readPeople()
       const person = people.find((p: any) => p.username === metadata.homelessPersonId)
       if (person) {
         person.balance = (person.balance || 0) + amount
         person.lastUpdated = new Date().toISOString()
         writePeople(people)
-        console.log(`Added R${amount} to ${person.name}'s balance. New balance: R${person.balance}`)
-        console.log(`✅ Updated balance for ${metadata.homelessPersonId}:`, person)
-      } else {
-        console.log(`❌ Person ${metadata.homelessPersonId} not found in people database`)
       }
     }
 
@@ -135,9 +105,7 @@ app.post("/api/complete-payment", async (req: Request, res: Response): Promise<a
       message: "Payment completed successfully",
     })
   } catch (err: any) {
-    console.error("❌ Error completing payment:")
-    console.error("Error details:", err)
-
+    console.error("Error completing payment:", err)
     return res.status(500).json({
       error: "Failed to complete payment",
       message: err.message,
@@ -151,16 +119,10 @@ app.post("/api/complete-payment", async (req: Request, res: Response): Promise<a
   }
 })
 
-// ✅ UPDATED: Q-Pay donation endpoint 
 app.post("/api/qpay-donation", async (req: Request, res: Response): Promise<any> => {
   const { receiverWallet, donorWallet, amount, redirectUrl, metadata, note } = req.body
 
-  console.log("=== Q-Pay Donation Debug ===")
-  console.log("Request body:", JSON.stringify(req.body, null, 2))
-
-  // Basic validation
   if (!receiverWallet || !donorWallet || !amount || !redirectUrl) {
-    console.log("❌ Validation failed - missing required fields")
     return res.status(400).json({
       error: "Validation failed",
       message: "receiverWallet, donorWallet, amount, and redirectUrl are required",
@@ -169,11 +131,7 @@ app.post("/api/qpay-donation", async (req: Request, res: Response): Promise<any>
   }
 
   try {
-    console.log("Step 1: Creating authenticated client...")
     const client = await getAuthenticatedClient()
-    console.log("✅ Authenticated client created successfully")
-
-    console.log("Step 2: Initiating Q-Pay donation...")
     const result = await initiateQPayDonation(client, {
       receiverWallet,
       donorWallet,
@@ -183,17 +141,13 @@ app.post("/api/qpay-donation", async (req: Request, res: Response): Promise<any>
       note,
     })
 
-    console.log("✅ Q-Pay donation initiated successfully")
-
     return res.status(200).json({
       success: true,
       data: result,
       message: "Q-Pay donation flow initiated successfully. Store the payment details for completion after user authorization.",
     })
   } catch (err: any) {
-    console.error("❌ Detailed error in Q-Pay donation:")
-    console.error("Full error object:", JSON.stringify(err, null, 2))
-
+    console.error("Error in Q-Pay donation:", err)
     return res.status(500).json({
       error: "Failed to initiate Q-Pay donation",
       message: err.message,
@@ -207,7 +161,6 @@ app.post("/api/qpay-donation", async (req: Request, res: Response): Promise<any>
   }
 })
 
-// Rest of your existing endpoints...
 app.post("/api/create-incoming-payment", async (req: Request, res: Response): Promise<any> => {
   const { senderWalletAddress, receiverWalletAddress, amount, metadata } = req.body
 
@@ -314,7 +267,7 @@ app.post("/api/outgoing-payment", async (req: Request, res: Response): Promise<a
         interactRef,
         continueUri,
         metadata,
-      }, // ✅ FIXED: Removed senderWalletAddress from here
+      },
       walletAddressDetails,
     )
 
@@ -325,12 +278,10 @@ app.post("/api/outgoing-payment", async (req: Request, res: Response): Promise<a
   }
 })
 
-// ✅ NEW: People API endpoints
 app.get('/api/people', (req: Request, res: Response): void => {
   res.json({ success: true, data: readPeople() })
 })
 
-// ✅ NEW: Get specific person by username
 app.get('/api/people/:username', (req: Request, res: Response): void => {
   try {
     const { username } = req.params
@@ -374,7 +325,6 @@ app.post('/api/people', (req: Request, res: Response): void => {
   res.json({ success: true, data: newPerson })
 })
 
-// ✅ NEW: Delete person by username
 app.delete('/api/people/:username', (req: Request, res: Response): void => {
   try {
     const { username } = req.params
@@ -389,7 +339,6 @@ app.delete('/api/people/:username', (req: Request, res: Response): void => {
     const deletedPerson = people.splice(personIndex, 1)[0]
     writePeople(people)
     
-    console.log(`✅ Deleted person: ${deletedPerson.name} (${username})`)
     res.json({ success: true, message: `Successfully deleted ${deletedPerson.name}` })
   } catch (error) {
     console.error('Error deleting person:', error)
@@ -397,7 +346,6 @@ app.delete('/api/people/:username', (req: Request, res: Response): void => {
   }
 })
 
-// ✅ NEW: Withdraw amount from person's balance
 app.post("/api/withdraw", (req: Request, res: Response): void => {
   try {
     const { username, amount } = req.body
@@ -427,12 +375,8 @@ app.post("/api/withdraw", (req: Request, res: Response): void => {
   }
 })
 
-// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// ============== ERROR HANDLING ==============
-
-// 404 (catch-all)
 app.use((req: Request, res: Response) => {
   res.status(404).json({
     error: "Endpoint not found",
@@ -457,13 +401,8 @@ app.use((req: Request, res: Response) => {
   })
 })
 
-// Global error handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("Global Error Handler:")
-  console.error("Error name:", err.name)
-  console.error("Error message:", err.message)
-  console.error("Error stack:", err.stack)
-
+  console.error("Global Error Handler:", err)
   res.status(err.status || 500).json({
     error: "Internal Server Error",
     message: err.message || "Something went wrong",
@@ -471,22 +410,12 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   })
 })
 
-// Start server
 app.listen(PORT, () => {
   console.log(`🚀 Express server running on http://localhost:${PORT}`)
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`)
-  console.log("\n📋 Available endpoints:")
-  console.log("  POST   /api/qpay-donation            - 🆕 Q-Pay: Complete QR-triggered donation flow")
-  console.log("  POST   /api/complete-payment         - 🆕 Complete payment after user authorization")
-  console.log("  POST   /api/create-incoming-payment  - Create incoming payment resource")
-  console.log("  POST   /api/create-quote             - Create quote resource")
-  console.log("  POST   /api/outgoing-payment-auth    - Get continuation grant for outgoing payment")
-  console.log("  POST   /api/outgoing-payment         - Create outgoing payment resource")
 })
 
 const PEOPLE_FILE = path.join(__dirname, 'data/people.json')
 
-// Helper to read/write people
 function readPeople(): any[] {
   try { return JSON.parse(fs.readFileSync(PEOPLE_FILE, 'utf8')) } catch { return [] }
 }
@@ -494,4 +423,4 @@ function writePeople(people: any[]): void {
   fs.writeFileSync(PEOPLE_FILE, JSON.stringify(people, null, 2))
 }
 
-export default app
+export default app 

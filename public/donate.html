@@ -173,7 +173,7 @@
         </div>
 
         <div class="people-grid">
-            <div class="person-card" onclick="donateTo('nomsa123')">
+            <div class="person-card" onclick="selectPerson('nomsa123')">
                 <div class="person-photo">👩</div>
                 <div class="person-name">Nomsa</div>
                 <div class="person-story">
@@ -194,7 +194,7 @@
                 </div>
             </div>
 
-            <div class="person-card" onclick="donateTo('steve456')">
+            <div class="person-card" onclick="selectPerson('steve456')">
                 <div class="person-photo">👨</div>
                 <div class="person-name">Steve</div>
                 <div class="person-story">
@@ -215,7 +215,7 @@
                 </div>
             </div>
 
-            <div class="person-card" onclick="donateTo('kuhle789')">
+            <div class="person-card" onclick="selectPerson('kuhle789')">
                 <div class="person-photo">👧</div>
                 <div class="person-name">Kuhle</div>
                 <div class="person-story">
@@ -239,8 +239,7 @@
     </div>
 
     <script>
-        function donateTo(personId) {
-            // Redirect to the donation page with the person ID
+        function selectPerson(personId) {
             window.location.href = `/donate-person/${personId}`;
         }
     </script>

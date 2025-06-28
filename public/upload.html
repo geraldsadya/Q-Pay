@@ -208,27 +208,44 @@
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = {
-                name: document.getElementById('name').value,
-                age: document.getElementById('age').value,
-                story: document.getElementById('story').value,
-                photo: document.getElementById('photo').value || '👤',
-                location: document.getElementById('location').value,
-                needs: document.getElementById('needs').value
-            };
+            const name = document.getElementById('name').value;
+            const username = name.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 1000);
+            const description = document.getElementById('story').value;
+            const photo = document.getElementById('photo').value || '👤';
+
+            if (!name || !description) {
+                alert('Name and story are required');
+                return;
+            }
 
             setLoading(true);
             hideMessages();
 
             try {
-                // For now, just simulate a successful upload
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                showSuccess(`User "${formData.name}" has been successfully uploaded to the platform!`);
-                document.getElementById('uploadForm').reset();
-                
+                const response = await fetch('http://localhost:3001/api/people', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        username,
+                        description,
+                        picture: photo
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showSuccess(`User "${name}" has been successfully uploaded to the platform!`);
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    showError(result.error || 'Upload failed');
+                }
             } catch (error) {
-                showError('Failed to upload user. Please try again.');
+                console.error('Error uploading user:', error);
+                showError('Error uploading user. Please try again.');
             } finally {
                 setLoading(false);
             }
