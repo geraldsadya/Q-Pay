@@ -103,20 +103,30 @@
     </div>
 
     <script>
-        async function loadPeople() {
-            try {
-                const response = await fetch('/api/people');
-                const result = await response.json();
-                
-                if (result.success) {
-                    displayPeople(result.data);
-                } else {
-                    throw new Error('Failed to load people');
+        function loadPeople() {
+            // Static data - no API call needed
+            const people = [
+                {
+                    name: "Nomsa",
+                    username: "nomsa123",
+                    picture: "img/nomsa.jpeg",
+                    description: "Nomsa lost everything in a devastating house fire last month. She's a single mother of two young children who are currently staying with relatives. She's working two jobs to save for a new home, but every day is a struggle. Your donation will help her family get back on their feet and find stable housing."
+                },
+                {
+                    name: "Steve",
+                    username: "steve456",
+                    picture: "img/james.jpeg",
+                    description: "Steve is a talented artist who lost his home after his art studio was destroyed in a flood. He's been living in his car for the past 3 months, but still creates beautiful paintings whenever he can. He dreams of having his own studio again and teaching art to underprivileged children. Your support can help him rebuild his life and his dreams."
+                },
+                {
+                    name: "Kuhle",
+                    username: "kuhle789",
+                    picture: "img/maria.jpeg",
+                    description: "Kuhle is a bright 19-year-old student who was forced to drop out of university when her parents lost their jobs. She's been sleeping in the library and working part-time at a restaurant, but it's not enough to pay for her education. She's determined to finish her degree in social work so she can help others in similar situations. Your donation can help her continue her education and achieve her dreams."
                 }
-            } catch (error) {
-                console.error('Error loading people:', error);
-                document.getElementById('peopleGrid').innerHTML = '<p>Error loading people. Please try again.</p>';
-            }
+            ];
+            
+            displayPeople(people);
         }
 
         function displayPeople(people) {
