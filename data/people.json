@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Nomsa",
+    "username": "nomsa123",
+    "picture": "https://placehold.co/48x48?text=N",
+    "description": "Nomsa lost everything in a devastating house fire last month. She's a single mother of two young children who are currently staying with relatives. She's working two jobs to save for a new home, but every day is a struggle. Your donation will help her family get back on their feet and find stable housing.",
+    "balance": 6737,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T11:31:59.044Z"
+  },
+  {
+    "name": "Steve",
+    "username": "steve456",
+    "picture": "https://placehold.co/48x48?text=S",
+    "description": "Steve is a talented artist who lost his home after his art studio was destroyed in a flood. He's been living in his car for the past 3 months, but still creates beautiful paintings whenever he can. He dreams of having his own studio again and teaching art to underprivileged children. Your support can help him rebuild his life and his dreams.",
+    "balance": 1755,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T10:09:17.045Z"
+  },
+  {
+    "name": "Kuhle",
+    "username": "kuhle789",
+    "picture": "https://placehold.co/48x48?text=K",
+    "description": "Kuhle is a bright 19-year-old student who was forced to drop out of university when her parents lost their jobs. She's been sleeping in the library and working part-time at a restaurant, but it's not enough to pay for her education. She's determined to finish her degree in social work so she can help others in similar situations. Your donation can help her continue her education and achieve her dreams.",
+    "balance": 349,
+    "createdAt": "2025-06-28T02:00:00.000Z",
+    "lastUpdated": "2025-06-28T11:31:33.612Z"
+  }
+]

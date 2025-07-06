@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NGO Dashboard - Q-Pay</title>
+  <style>
+    body { font-family: sans-serif; background: #f3f4f6; }
+    .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);}
+    h2 { text-align: center; margin-bottom: 24px; }
+    .total-balance { font-size: 1.3rem; color: #10b981; text-align: center; margin-bottom: 24px; }
+    .client-list { margin-bottom: 32px; }
+    .client-card { background: #f8fafc; border-radius: 10px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; }
+    .client-photo { width: 48px; height: 48px; border-radius: 50%; margin-right: 18px; object-fit: cover; background: #eee; }
+    .client-info { flex: 1; }
+    .client-name { font-weight: 700; }
+    .client-balance { color: #10b981; font-weight: 600; }
+    .add-btn { background: #667eea; color: #fff; border: none; border-radius: 6px; padding: 10px 18px; font-weight: 700; cursor: pointer; }
+    .add-btn:hover { background: #5a67d8; }
+    .form-group { margin-bottom: 12px; }
+    label { font-weight: 600; }
+    input, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd; }
+    .qr-section { text-align: center; margin-top: 24px; }
+    .withdraw-form { display: flex; gap: 8px; margin-top: 8px; }
+    .withdraw-form input { width: 80px; }
+    .delete-btn { 
+      background: #ef4444; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+      padding: 6px 12px; 
+      font-size: 12px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin-left: 8px;
+      transition: all 0.3s ease;
+    }
+    .delete-btn:hover { 
+      background: #dc2626; 
+      transform: scale(1.05);
+    }
+    .back-btn { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px; 
+      background: #667eea; 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 12px 20px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      text-decoration: none; 
+      display: inline-block;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { 
+      background: #5a67d8; 
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="back-btn">← Back to Home</a>
+  <div class="container">
+    <h2>NGO Dashboard</h2>
+    <div class="total-balance" id="totalBalance"></div>
+    <div class="client-list" id="clientList"></div>
+    <button class="add-btn" onclick="showAddForm()">+ Onboard New Client</button>
+    <div id="addForm" style="display:none; margin-top:24px;">
+      <h3>Add New Client</h3>
+      <form id="newClientForm">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="newName" required>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="newUsername" required>
+        </div>
+        <div class="form-group">
+          <label>Picture</label>
+          <input type="file" id="newPic" accept="image/*" required>
+          <small style="color: #666; font-size: 12px;">Upload an image from your computer (JPG, PNG, GIF)</small>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="newDesc" required></textarea>
+        </div>
+        <button type="submit" class="add-btn">Add Client</button>
+      </form>
+    </div>
+    <div class="qr-section" id="qrSection" style="display:none;">
+      <h3>Client Added! Share this QR code:</h3>
+      <canvas id="qrCode"></canvas>
+      <div id="qrLink"></div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+  <script>
+    async function loadClients() {
+      const res = await fetch('/api/people');
+      const data = await res.json();
+      const clients = data.data || [];
+      let total = 0;
+      let html = '';
+      clients.forEach(person => {
+        total += person.balance || 0;
+        
+        let imageSrc = person.picture || 'https://placehold.co/48x48?text=' + person.name.charAt(0);
+        
+        if (imageSrc.startsWith('data:image/')) {
+        } else if (imageSrc.startsWith('img/')) {
+        } else if (imageSrc.startsWith('http')) {
+        } else {
+          imageSrc = 'https://placehold.co/48x48?text=' + person.name.charAt(0);
+        }
+        
+        html += `
+          <div class="client-card">
+            <img src="${imageSrc}" class="client-photo" onerror="this.src='https://placehold.co/48x48?text=${person.name.charAt(0)}'" />
+            <div class="client-info">
+              <div class="client-name">${person.name} <span style="color:#888;">(@${person.username})</span></div>
+              <div>${person.description || ''}</div>
+              <form class="withdraw-form" onsubmit="return withdraw('${person.username}', this)">
+                <input type="number" min="1" step="1" name="amount" placeholder="Withdraw" required>
+                <button type="submit" class="add-btn" style="padding:4px 10px;">Withdraw</button>
+                <button type="button" class="delete-btn" onclick="deletePerson('${person.username}', '${person.name}')">Delete</button>
+              </form>
+            </div>
+            <div class="client-balance">R${(person.balance||0).toFixed(2)}</div>
+          </div>
+        `;
+      });
+      document.getElementById('clientList').innerHTML = html;
+      document.getElementById('totalBalance').innerText = 'Total received: R' + total.toFixed(2);
+    }
+    loadClients();
+
+    function showAddForm() {
+      document.getElementById('addForm').style.display = '';
+      document.getElementById('qrSection').style.display = 'none';
+    }
+
+    document.getElementById('newClientForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('newName').value;
+      const username = document.getElementById('newUsername').value;
+      const pictureFile = document.getElementById('newPic').files[0];
+      const description = document.getElementById('newDesc').value;
+      
+      let picture = '';
+      if (pictureFile) {
+        picture = await convertFileToDataURL(pictureFile);
+      }
+      
+      const res = await fetch('/api/people', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, picture, description })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadClients();
+        document.getElementById('addForm').style.display = 'none';
+        const url = 'http://localhost:3001/donate-person/' + username;
+        document.getElementById('qrSection').style.display = '';
+        document.getElementById('qrLink').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+        new QRious({ element: document.getElementById('qrCode'), value: url, size: 180 });
+      } else {
+        alert(data.error || 'Error adding client');
+      }
+    }
+
+    function convertFileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          resolve(e.target.result);
+        };
+        reader.onerror = function(e) {
+          reject(e);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.withdraw = async function(username, form) {
+      const amount = form.amount.value;
+      if (!amount) return false;
+      const res = await fetch('/api/withdraw', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, amount: parseFloat(amount) })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadClients();
+        form.amount.value = '';
+      } else {
+        alert(data.error || 'Error withdrawing');
+      }
+      return false;
+    }
+
+    window.deletePerson = async function(username, name) {
+      if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone and will remove all their donation history.`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/people/${username}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          alert(`${name} has been successfully deleted.`);
+          loadClients();
+        } else {
+          alert(data.error || 'Error deleting person');
+        }
+      } catch (error) {
+        console.error('Error deleting person:', error);
+        alert('Error deleting person. Please try again.');
+      }
+    }
+  </script>
+</body>
+</html> 

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - Q-Pay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #5a6fd8;
+        }
+
+        .person-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .person-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-right: 20px;
+        }
+
+        .person-details h2 {
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .person-details p {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .amount-btn {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .amount-btn:hover {
+            border-color: #667eea;
+            background: #f8fafc;
+        }
+
+        .amount-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .custom-amount {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .amount-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/donate" class="back-link">← Back to Donation Selection</a>
+        
+        <div class="person-info">
+            <div class="person-photo" id="personPhoto">👤</div>
+            <div class="person-details">
+                <h2 id="personName">Loading...</h2>
+                <p id="personStory">Loading person details...</p>
+            </div>
+        </div>
+
+        <h1>Make a Donation</h1>
+        
+        <form id="donationForm">
+            <div class="form-group">
+                <label>Donation Amount</label>
+                <div class="amount-buttons">
+                    <div class="amount-btn" data-amount="10">R10</div>
+                    <div class="amount-btn" data-amount="25">R25</div>
+                    <div class="amount-btn" data-amount="50">R50</div>
+                    <div class="amount-btn" data-amount="100">R100</div>
+                    <div class="amount-btn" data-amount="custom">Custom</div>
+                </div>
+                <input type="number" id="customAmount" class="custom-amount" placeholder="Enter amount" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="purpose">Purpose of Donation</label>
+                <select id="purpose" required>
+                    <option value="">Select a purpose</option>
+                    <option value="food">Food</option>
+                    <option value="shelter">Shelter</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="medical">Medical</option>
+                    <option value="education">Education</option>
+                    <option value="general">General Support</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="donorName">Your Name (Optional)</label>
+                <input type="text" id="donorName" placeholder="Anonymous">
+            </div>
+
+            <button type="submit" class="btn" id="donateBtn">Donate Now</button>
+        </form>
+
+        <div id="error" class="error"></div>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            Processing your donation...
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_BASE_URL: "https://your-backend-url.com", // Replace with your deployed backend URL
+            DONOR_WALLET: "$ilp.interledger-test.dev/zars", // YOUR ZAR wallet (sending money)
+            RECEIVER_WALLET: "$ilp.interledger-test.dev/abo1", // Replace with receiver wallet
+            REDIRECT_URL: window.location.origin + "/success.html", // Where to redirect after payment
+        }
+
+        function getPersonId() {
+            const path = window.location.pathname;
+            const match = path.match(/\/donate-person\/(.+)/);
+            return match ? match[1] : "nomsa123";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const personId = getPersonId()
+            setupEventListeners()
+            updatePersonInfo(personId)
+        })
+
+        async function updatePersonInfo(personId) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/people/${personId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch person data');
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success || !result.data) {
+                    throw new Error('Invalid response format');
+                }
+                
+                const person = result.data;
+                
+                document.getElementById("personName").textContent = person.name;
+                document.getElementById("personStory").textContent = person.description || "Help this person get back on their feet. Every donation makes a difference.";
+                
+                const personPhotoElement = document.getElementById("personPhoto");
+                if (person.picture && person.picture.startsWith('data:image/')) {
+                    personPhotoElement.innerHTML = `<img src="${person.picture}" alt="${person.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+                } else if (person.picture && person.picture.startsWith('http')) {
+                    personPhotoElement.innerHTML = `<img src="${person.picture}" alt="${person.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    personPhotoElement.textContent = person.picture || "👤";
+                }
+                
+            } catch (error) {
+                console.error("Error fetching person data:", error);
+                document.getElementById("personName").textContent = "Person";
+                document.getElementById("personStory").textContent = "Help this person get back on their feet. Every donation makes a difference in providing essential needs like food, shelter, and support.";
+                document.getElementById("personPhoto").textContent = "👤";
+            }
+        }
+
+        function setupEventListeners() {
+            const amountButtons = document.querySelectorAll(".amount-btn")
+            const customAmountInput = document.getElementById("customAmount")
+
+            amountButtons.forEach((btn) => {
+                btn.addEventListener("click", function () {
+                    amountButtons.forEach((b) => b.classList.remove("selected"))
+                    this.classList.add("selected")
+
+                    if (this.dataset.amount === "custom") {
+                        customAmountInput.style.display = "block"
+                        customAmountInput.focus()
+                    } else {
+                        customAmountInput.style.display = "none"
+                        customAmountInput.value = ""
+                    }
+                })
+            })
+
+            const form = document.getElementById("donationForm")
+            form.addEventListener("submit", handleDonation)
+        }
+
+        async function handleDonation(event) {
+            event.preventDefault()
+
+            const formData = getFormData()
+
+            if (!validateForm(formData)) {
+                return
+            }
+
+            setLoading(true)
+
+            try {
+                const result = await initiateDonation(formData)
+
+                if (result.success && result.data && result.data.authResponse && result.data.authResponse.redirectUrl) {
+                    // ✅ NEW: Store payment data in sessionStorage for completion after redirect
+                    const paymentData = {
+                        continueUri: result.data.authResponse.continueUri,
+                        continueAccessToken: result.data.authResponse.continueAccessToken,
+                        quoteId: result.data.quote.id,
+                        metadata: {
+                            donorName: formData.donorName,
+                            homelessPersonId: formData.personId,
+                            shelterName: "Q-Pay Demo",
+                            purpose: formData.purpose,
+                        }
+                    };
+
+                    console.log('Storing payment data in sessionStorage:', paymentData);
+                    sessionStorage.setItem('qpay_payment_data', JSON.stringify(paymentData));
+
+                    // Redirect to payment authorization
+                    console.log("Redirecting to:", result.data.authResponse.redirectUrl)
+                    window.location.href = result.data.authResponse.redirectUrl
+                } else {
+                    throw new Error("Failed to get authorization URL from server")
+                }
+            } catch (error) {
+                console.error("Donation error:", error)
+                showError(`Failed to process donation: ${error.message}`)
+                setLoading(false)
+            }
+        }
+
+        function getFormData() {
+            const selectedAmountBtn = document.querySelector(".amount-btn.selected")
+            let amount = ""
+
+            if (selectedAmountBtn) {
+                if (selectedAmountBtn.dataset.amount === "custom") {
+                    amount = document.getElementById("customAmount").value
+                } else {
+                    amount = selectedAmountBtn.dataset.amount
+                }
+            }
+
+            return {
+                amount: amount,
+                purpose: document.getElementById("purpose").value,
+                donorName: document.getElementById("donorName").value || "Anonymous",
+                personId: getPersonId(),
+            }
+        }
+
+        function validateForm(formData) {
+            if (!formData.amount || Number.parseFloat(formData.amount) <= 0) {
+                showError("Please select or enter a valid amount")
+                return false
+            }
+
+            if (!formData.purpose) {
+                showError("Please select a purpose for your donation")
+                return false
+            }
+
+            return true
+        }
+
+        async function initiateDonation(formData) {
+            const donationData = {
+                receiverWallet: CONFIG.RECEIVER_WALLET,
+                donorWallet: CONFIG.DONOR_WALLET,
+                amount: formData.amount.toString(),
+                redirectUrl: CONFIG.REDIRECT_URL,
+                metadata: {
+                    donorName: formData.donorName,
+                    homelessPersonId: formData.personId,
+                    shelterName: "Q-Pay Demo",
+                    purpose: formData.purpose,
+                },
+                note: `${formData.purpose} donation for ${formData.personId}`,
+            }
+
+            console.log("Sending donation data:", donationData)
+
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/qpay-donation`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(donationData),
+            })
+
+            const responseData = await response.json()
+            console.log("Server response:", responseData)
+
+            if (!response.ok) {
+                throw new Error(responseData.message || responseData.error || "Network error")
+            }
+
+            return responseData
+        }
+
+        function setLoading(isLoading) {
+            const loadingEl = document.getElementById("loading")
+            const donateBtn = document.getElementById("donateBtn")
+
+            if (isLoading) {
+                loadingEl.style.display = "block"
+                donateBtn.disabled = true
+                donateBtn.textContent = "Processing..."
+            } else {
+                loadingEl.style.display = "none"
+                donateBtn.disabled = false
+                donateBtn.textContent = "Donate Now"
+            }
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById("error")
+            errorEl.textContent = message
+            errorEl.style.display = "block"
+
+            setTimeout(() => {
+                errorEl.style.display = "none"
+            }, 10000)
+        }
+    </script>
+</body>
+</html> 

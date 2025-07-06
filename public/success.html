@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Authorization - Q-Pay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: white;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: white;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .status-message {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .details-section {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .details-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .error-details {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #991b1b;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .debug-section {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #374151;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading-state">
+            <div class="spinner"></div>
+            <h1>Processing Payment</h1>
+            <p class="status-message">Please wait while we complete your donation...</p>
+        </div>
+
+        <div id="success-state" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h1>Payment Successful!</h1>
+            <p class="status-message">Your donation has been completed successfully. Thank you for your generosity!</p>
+            <div class="details-section" id="payment-details">
+                <!-- Payment details will be populated here -->
+            </div>
+            <button class="btn" onclick="window.location.href='/donate-selection.html'">Donate Again</button>
+        </div>
+
+        <div id="error-state" style="display: none;">
+            <div class="error-icon">✗</div>
+            <h1>Payment Failed</h1>
+            <p class="status-message" id="error-message">There was an issue processing your payment.</p>
+            <div class="error-details" id="error-details" style="display: none;">
+                <!-- Error details will be populated here -->
+            </div>
+            <button class="btn" onclick="retryPayment()">Try Again</button>
+            <button class="btn btn-secondary" onclick="window.close()">Close</button>
+        </div>
+
+        <div class="debug-section" id="debug-info" style="display: none;">
+            <div class="details-title">Debug Information</div>
+            <pre id="debug-content"></pre>
+        </div>
+    </div>
+
+    <script>
+        const isDev = window.location.hostname === 'localhost';
+        if (isDev) {
+            document.getElementById('debug-info').style.display = 'none';
+        }
+
+        async function completePayment() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const hash = urlParams.get('hash');
+                const interact_ref = urlParams.get('interact_ref');
+
+                const storedData = sessionStorage.getItem('qpayPaymentData');
+
+                if (!storedData) {
+                    const backupData = localStorage.getItem('qpayPaymentData');
+                    
+                    if (!backupData) {
+                        throw new Error('No payment data found in session storage or localStorage. Please restart the payment flow.');
+                    }
+                    
+                    sessionStorage.setItem('qpayPaymentData', backupData);
+                    storedData = backupData;
+                }
+
+                const paymentData = JSON.parse(storedData);
+
+                if (!interact_ref) {
+                    throw new Error('Missing interact_ref parameter in URL');
+                }
+
+                const completionPayload = {
+                    continueUri: paymentData.continueUri,
+                    continueAccessToken: paymentData.continueAccessToken,
+                    interactRef: interact_ref,
+                    quoteId: paymentData.quoteId,
+                    senderWalletAddress: paymentData.senderWalletAddress || paymentData.donorWalletAddress,
+                    metadata: paymentData.metadata
+                };
+
+                const response = await fetch('http://localhost:3001/api/complete-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(completionPayload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showSuccess(result.data);
+                    sessionStorage.removeItem('qpayPaymentData');
+                } else {
+                    const errorMsg = result.message || result.error || 'Payment completion failed';
+                    throw new Error(errorMsg);
+                }
+
+            } catch (error) {
+                console.error('Payment completion error:', error);
+                showError(error.message, error);
+            }
+        }
+
+        function showSuccess(paymentData) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+
+            const detailsContainer = document.getElementById('payment-details');
+            detailsContainer.innerHTML = `
+                <div class="details-title">Payment Details</div>
+                <div class="detail-item">
+                    <span class="detail-label">Payment ID:</span> 
+                    ${paymentData.id ? paymentData.id.split('/').pop() : 'Generated'}
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span> 
+                    <span style="color: #10b981; font-weight: 500;">Completed</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Timestamp:</span> 
+                    ${new Date().toLocaleString()}
+                </div>
+                ${paymentData.walletAddress ? `
+                <div class="detail-item">
+                    <span class="detail-label">From:</span> 
+                    ${paymentData.walletAddress.replace('https://ilp.interledger-test.dev/', '$')}
+                </div>
+                ` : ''}
+            `;
+        }
+
+        function showError(message, error) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+
+            document.getElementById('error-message').textContent = message;
+
+            if (error && (error.details || error.stack)) {
+                const errorDetailsContainer = document.getElementById('error-details');
+                errorDetailsContainer.style.display = 'block';
+                errorDetailsContainer.textContent = error.details || error.stack || JSON.stringify(error, null, 2);
+            }
+        }
+
+        function retryPayment() {
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('loading-state').style.display = 'block';
+            setTimeout(completePayment, 1000);
+        }
+
+        window.addEventListener('load', () => {
+            completePayment();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+            }
+        });
+    </script>
+</body>
+</html>

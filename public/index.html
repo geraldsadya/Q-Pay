@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Q-Pay</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container flex-between">
+      <div class="brand">
+        <div class="logo-icon">❤️</div>
+        <span class="brand-name">Q-Pay</span>
+      </div>
+      <nav>
+        <a href="/ngo-login.html" class="nav-link">Vendor Portal</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero text-center">
+    <h1 class="hero-title">
+      Purpose-Bound <span class="gradient-text">Donations</span>
+    </h1>
+    <p class="hero-subtitle">
+      Scan. Donate. Empower lives with secure, purposeful giving through verified vendors and trusted shelters.
+    </p>
+    <div class="button-group">
+      <button class="btn primary" onclick="window.location.href='/donate-selection.html'">
+        <span class="icon">🛡️</span> Are you a donor?
+      </button>
+      <button class="btn outline" onclick="window.location.href='/ngo-login.html'">Are you an NGO?</button>
+    </div>
+  </section>
+
+  <!-- Image Carousel -->
+  <div class="carousel">
+    <div class="carousel-track">
+      <img src="img/image1.jpeg" alt="Slide 1" />
+      <img src="img/image2.jpg" alt="Slide 2" />
+      <img src="img/image3.avif" alt="Slide 3" />
+      <img src="img/image4.png" alt="Slide 4" />
+      <img src="img/image5.jpg" alt="Slide 5" />
+    </div>
+  </div>
+
+  <!-- Demo Residents -->
+  <section class="residents">
+    <h2>Meet Our Residents</h2>
+    <p class="subtext">Click a resident below to learn their story and contribute directly</p>
+    <div class="resident-cards">
+      <a href="/donate-person/nomsa123" class="resident-card">
+        <img src="img/nomsa.jpeg" alt="Nomsa" class="resident-photo" />
+        <h3>Nomsa</h3>
+        <p>Single mother seeking stable housing</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+      <a href="/donate-person/steve456" class="resident-card">
+        <img src="img/james.jpeg" alt="Steve" class="resident-photo" />
+        <h3>Steve</h3>
+        <p>Veteran working towards independence</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+      <a href="/donate-person/kuhle789" class="resident-card">
+        <img src="img/maria.jpeg" alt="Kuhle" class="resident-photo" />
+        <h3>Kuhle</h3>
+        <p>Student overcoming housing challenges</p>
+        <div class="qr-icon">
+          <span style="color:white;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 5H10V10H5V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 5H19V10H14V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 14H10V19H5V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14H19V19H14V14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <span class="hint">Scan or click to donate</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="features">
+    <h2>How It Works</h2>
+    <div class="feature-cards">
+      <div class="feature">
+        <div class="feature-icon">📷</div>
+        <h3>Scan QR Code</h3>
+        <p>Each resident has a unique QR code linking directly to their donation portal.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <h3>Purpose-Bound Donations</h3>
+        <p>Funds are restricted to essential categories like food, hygiene, and transport.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⏰</div>
+        <h3>Smart Expiry</h3>
+        <p>Unused funds expire after a set period to prevent misuse or hoarding.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta text-center">
+    <h2>Get Involved</h2>
+    <p>
+      Are you a shelter or organization working with the homeless? Register with DigniPay to empower your
+      residents through secure, traceable donations.
+    </p>
+    <div class="button-group">
+      <button class="btn primary" onclick="window.location.href='/ngo-login.html'"><span class="icon">👥</span> Register Your Shelter</button>
+      <button class="btn outline" onclick="window.location.href='/donate-selection.html'"><span class="icon">🤝</span> Become a Donor</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>&copy; <span id="year"></span> DigniPay. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/contact">Contact</a>
+    </div>
+  </footer>
+
+  <script src="index.js" defer></script>
+</body>
+</html>

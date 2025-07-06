@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Dashboard - Q-Pay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #5a6fd8;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .balance-card {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .balance-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .person-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .person-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-right: 15px;
+        }
+
+        .person-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .balance-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .balance-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .last-updated {
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .withdrawal-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .withdrawal-section h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .withdrawal-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        select, input {
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .withdrawal-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Welcome</a>
+        
+        <h1>💰 Balance Dashboard</h1>
+        
+        <button class="refresh-btn" onclick="loadBalances()">🔄 Refresh Balances</button>
+        
+        <div id="message" class="message"></div>
+        
+        <div id="balanceGrid" class="balance-grid">
+            <!-- Balances will be loaded here -->
+        </div>
+        
+        <div class="withdrawal-section">
+            <h3>💸 Process Withdrawal</h3>
+            <form id="withdrawalForm" class="withdrawal-form">
+                <div class="form-group">
+                    <label for="personSelect">Select Person</label>
+                    <select id="personSelect" required>
+                        <option value="">Choose a person</option>
+                        <option value="nomsa123">Nomsa</option>
+                        <option value="steve456">Steve</option>
+                        <option value="kuhle789">Kuhle</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="withdrawAmount">Amount (R)</label>
+                    <input type="number" id="withdrawAmount" placeholder="Enter amount" min="0.01" step="0.01" required>
+                </div>
+                
+                <button type="submit" class="btn">Withdraw</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const personData = {
+            nomsa123: { name: "Nomsa", photo: "👩" },
+            steve456: { name: "Steve", photo: "👨" },
+            kuhle789: { name: "Kuhle", photo: "👧" }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalances();
+        });
+
+        async function loadBalances() {
+            try {
+                const response = await fetch('http://localhost:3001/api/people');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayBalances(result.data);
+                } else {
+                    throw new Error('Failed to load balances');
+                }
+            } catch (error) {
+                console.error('Error loading balances:', error);
+                document.getElementById('balanceGrid').innerHTML = '<p>Error loading balances. Please try again.</p>';
+            }
+        }
+
+        function displayBalances(people) {
+            const container = document.getElementById('balanceGrid');
+            container.innerHTML = '';
+
+            let totalBalance = 0;
+
+            people.forEach(person => {
+                const balance = person.balance || 0;
+                totalBalance += balance;
+
+                const balanceCard = document.createElement('div');
+                balanceCard.className = 'balance-card';
+                balanceCard.innerHTML = `
+                    <div class="person-info">
+                        <h3>${person.name}</h3>
+                        <p>@${person.username}</p>
+                    </div>
+                    <div class="balance-info">
+                        <div class="balance-amount">R${balance.toFixed(2)}</div>
+                        <form class="withdraw-form" onsubmit="return handleWithdrawal('${person.username}', this)">
+                            <input type="number" name="amount" min="1" step="0.01" placeholder="Amount" required>
+                            <button type="submit">Withdraw</button>
+                        </form>
+                    </div>
+                `;
+                container.appendChild(balanceCard);
+            });
+
+            const totalElement = document.createElement('div');
+            totalElement.className = 'total-balance';
+            totalElement.textContent = `Total Balance: R${totalBalance.toFixed(2)}`;
+            container.appendChild(totalElement);
+        }
+
+        async function handleWithdrawal(username, form) {
+            const amount = parseFloat(form.amount.value);
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return false;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3001/api/withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, amount }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`Successfully withdrew R${amount} from ${username}`);
+                    form.amount.value = '';
+                    loadBalances();
+                } else {
+                    alert(result.error || 'Withdrawal failed');
+                }
+            } catch (error) {
+                console.error('Error processing withdrawal:', error);
+                alert('Error processing withdrawal. Please try again.');
+            }
+
+            return false;
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

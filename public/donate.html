@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Pay - Help Those in Need</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #e5e7eb;
+        }
+
+        .people-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .person-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .person-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        .person-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .person-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .person-story {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .donate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .donate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .people-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .person-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Welcome</a>
+        
+        <div class="header">
+            <h1>🤝 Help Those in Need</h1>
+            <p>Your donation can make a real difference in someone's life</p>
+        </div>
+
+        <div class="people-grid">
+            <div class="person-card" onclick="selectPerson('nomsa123')">
+                <div class="person-photo">👩</div>
+                <div class="person-name">Nomsa</div>
+                <div class="person-story">
+                    Nomsa is a single mother of two who lost her job during the pandemic. 
+                    She's been struggling to provide basic necessities for her children. 
+                    Every donation helps her family get back on their feet and find stable housing.
+                </div>
+                <button class="donate-btn">Donate to Nomsa</button>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">Children</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Months Homeless</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="person-card" onclick="selectPerson('steve456')">
+                <div class="person-photo">👨</div>
+                <div class="person-name">Steve</div>
+                <div class="person-story">
+                    Steve is a veteran who served his country for 8 years. After returning home, 
+                    he struggled with PTSD and couldn't find stable employment. 
+                    He's working hard to rebuild his life and find permanent housing.
+                </div>
+                <button class="donate-btn">Donate to Steve</button>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Years Served</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">Years Homeless</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="person-card" onclick="selectPerson('kuhle789')">
+                <div class="person-photo">👧</div>
+                <div class="person-name">Kuhle</div>
+                <div class="person-story">
+                    Kuhle is a 19-year-old student who was forced to leave home due to family conflicts. 
+                    She's determined to finish her education and build a better future. 
+                    Your support helps her stay in school and work towards her dreams.
+                </div>
+                <button class="donate-btn">Donate to Kuhle</button>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number">19</div>
+                        <div class="stat-label">Years Old</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">1</div>
+                        <div class="stat-label">Year Homeless</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectPerson(personId) {
+            window.location.href = `/donate-person/${personId}`;
+        }
+    </script>
+</body>
+</html> 
