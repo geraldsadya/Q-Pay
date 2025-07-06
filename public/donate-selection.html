@@ -105,7 +105,7 @@
     <script>
         async function loadPeople() {
             try {
-                const response = await fetch('http://localhost:3001/api/people');
+                const response = await fetch('/api/people');
                 const result = await response.json();
                 
                 if (result.success) {
